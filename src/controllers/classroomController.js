@@ -1,6 +1,7 @@
 import { Classroom } from "../models/classroom.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Teacher } from "../models/teacher.model.js";
+import { Student } from "../models/student.model.js";
 
 export class ClassroomController {
 	createClassroom = async (req, res) => {
@@ -138,6 +139,116 @@ export class ClassroomController {
 						200,
 						{ classrooms },
 						"Classrooms fetched successfully",
+					),
+				);
+		} catch (error) {
+			res.status(500).json(new ApiResponse(500, {}, error.message));
+		}
+	};
+
+	addStudentToClassroom = async (req, res) => {
+		try {
+			const { classroomId } = req.params;
+			const { studentId } = req.body;
+
+			const classroom = await Classroom.findById(classroomId);
+			if (!classroom) {
+				return res
+					.status(404)
+					.json(new ApiResponse(404, {}, "Classroom not found"));
+			}
+
+			if (classroom.classroomTeacherId.toString() !== req.user._id.toString()) {
+				return res
+					.status(403)
+					.json(
+						new ApiResponse(
+							403,
+							{},
+							"You are not authorized to add student to this classroom",
+						),
+					);
+			}
+
+			classroom.classroomStudents.push(studentId);
+			await classroom.save();
+
+			const student = await Student.findById(student);
+			if (!student) {
+				return res
+					.status(404)
+					.json(new ApiResponse(404, {}, "Student not found"));
+			}
+			student.studentClassrooms.push(classroomId);
+			await student.save();
+
+			res
+				.status(200)
+				.json(
+					new ApiResponse(
+						200,
+						"Student added to classroom successfully",
+					),
+				);
+		} catch (error) {
+			res.status(500).json(new ApiResponse(500, {}, error.message));
+		}
+	};
+
+	removeStudentFromClassroom = async (req, res) => {
+		try {
+			const { classroomId, studentId } = req.params;
+
+			const classroom = await Classroom.findById(classroomId);
+			if (!classroom) {
+				return res
+					.status(404)
+					.json(new ApiResponse(404, {}, "Classroom not found"));
+			}
+
+			if (classroom.classroomTeacherId.toString() !== req.user._id.toString()) {
+				return res
+					.status(403)
+					.json(
+						new ApiResponse(
+							403,
+							{},
+							"You are not authorized to remove student from this classroom",
+						),
+					);
+			}
+			const student = await Student.findById(studentId);
+			if (!student) {
+				return res
+					.status(404)
+					.json(new ApiResponse(404, {}, "Student not found"));
+			}
+
+			const studentIndex = classroom.classroomStudents.findIndex(
+				(student) => student.toString() === studentId,
+			);
+			if (studentIndex === -1) {
+				return res
+					.status(404)
+					.json(new ApiResponse(404, {}, "Student not found in classroom"));
+			}
+
+			classroom.classroomStudents = classroom.classroomStudents.filter(
+				(student) => student.toString() !== studentId,
+			);
+			await classroom.save();
+
+			student.studentClassrooms = student.studentClassrooms.filter(
+				(classroom) => classroom.toString() !== classroomId,
+			);
+			await student.save();
+
+			res
+				.status(200)
+				.json(
+					new ApiResponse(
+						200,
+						"Student removed from classroom successfully",
 					),
 				);
 		} catch (error) {

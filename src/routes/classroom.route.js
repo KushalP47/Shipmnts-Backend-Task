@@ -16,3 +16,21 @@ router.delete(
 	verifyIsTeacher,
 	classroomController.deleteClassroom,
 );
+
+router.post(
+	"/:classroomId/student",
+	verifyJWT,
+	verifyIsTeacher,
+	classroomController.addStudentToClassroom,
+);
+
+router.delete(
+	"/:classroomId/student/:studentId",
+	verifyJWT,
+	verifyIsTeacher,
+	classroomController.removeStudentFromClassroom,
+);
+
+
+
+export default router;
