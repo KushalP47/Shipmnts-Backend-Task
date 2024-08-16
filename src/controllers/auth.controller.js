@@ -134,7 +134,6 @@ export class AuthController {
 			return res
 				.status(200)
 				.cookie("accessToken", accessToken, options)
-				.cookie("refreshToken", refreshToken, options)
 				.json(
 					new ApiResponse(
 						200,
@@ -161,7 +160,6 @@ export class AuthController {
 			return res
 				.status(200)
 				.clearCookie("accessToken")
-				.clearCookie("refreshToken")
 				.json(new ApiResponse(200, {}, "User logged out successfully!!"));
 		} catch (error) {
 			return res.status(500).json({ error: error.message });
