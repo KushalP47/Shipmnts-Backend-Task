@@ -1,5 +1,6 @@
 import Router from "express";
 import { classroomController } from "../controllers/classroom.controller.js";
+import { taskController } from "../controllers/task.controller.js";
 import { verifyJWT } from "../middleware/verifyJWT.js";
 import { verifyIsTeacher } from "../middleware/verifyIsTeacher.js";
 const router = Router();
@@ -35,14 +36,20 @@ router.delete(
 	classroomController.removeStudentFromClassroom,
 );
 
-
 // add task to classroom
 router.post(
-    "/:classroomId/task",
-    verifyJWT,
-    verifyIsTeacher,
-    classroomController.addTaskToClassroom,
+	"/:classroomId/task",
+	verifyJWT,
+	verifyIsTeacher,
+	classroomController.addTaskToClassroom,
 );
 
+// get tasks submission status
+router.get(
+	"/:classroomId/task/:taskId/submissions",
+	verifyJWT,
+	verifyIsTeacher,
+	taskController.getTaskSubmissions,
+);
 
 export default router;
