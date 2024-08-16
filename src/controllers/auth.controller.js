@@ -85,7 +85,7 @@ export class AuthController {
 
 			user.refreshToken = refreshToken;
 
-			user.save({ validateBeforeSave: false });
+			user.save({ validateBeforeSave: true });
 			const options = {
 				secure: true,
 				httpOnly: true,
@@ -115,31 +115,54 @@ export class AuthController {
 			const { userEmail, userPassword } = req.body;
 			const user = await User.findOne({ userEmail });
 			if (!user) {
-				return res.status(404).json({ error: "User not found" });
+				return res.status(404).json(new ApiResponse(404, {}, "User not found"));
 			}
-			const valid = await bcrypt.compare(userPassword, user.userPassword);
+			const valid = await user.isPasswordCorrect(userPassword);
 			if (!valid) {
-				return res.status(400).json({ error: "Invalid credentials" });
+				return res
+					.status(400)
+					.json(new ApiResponse(400, {}, "Invalid password"));
 			}
-			return res.status(200).json({ token });
+			const accessToken = user.generateAccessToken();
+			const refreshToken = user.generateRefreshToken();
+			user.refreshToken = refreshToken;
+			user.save({ validateBeforeSave: false });
+			const options = {
+				secure: true,
+				httpOnly: true,
+			};
+			return res
+				.status(200)
+				.cookie("accessToken", accessToken, options)
+				.cookie("refreshToken", refreshToken, options)
+				.json(
+					new ApiResponse(
+						200,
+						{ user: user.toJSON },
+						"User logged in successfully!!",
+					),
+				);
 		} catch (error) {
 			return res.status(500).json({ error: error.message });
 		}
 	}
 
-	static async logout(req, res) {
+	async logout(req, res) {
 		try {
-			const { userId } = req.body;
-			const user = await User.findById(userId);
+			const { userEmail } = req.body;
+			const user = await User.findOne({ userEmail });
 
 			if (!user) {
-				return res.status(404).json({ error: "User not found" });
+				return res.status(404).json(new ApiResponse(404, {}, "User not found"));
 			}
 			user.refreshToken = "";
-			user.accessToken = "";
 
 			user.save({ validateBeforeSave: false });
-			return res.status(200).json({ message: "User logged out successfully" });
+			return res
+				.status(200)
+				.clearCookie("accessToken")
+				.clearCookie("refreshToken")
+				.json(new ApiResponse(200, {}, "User logged out successfully!!"));
 		} catch (error) {
 			return res.status(500).json({ error: error.message });
 		}

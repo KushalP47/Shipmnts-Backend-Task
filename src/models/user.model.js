@@ -49,7 +49,7 @@ userSchema.pre("save", async function (next) {
 
 // method to check if given Password is correct or not
 userSchema.methods.isPasswordCorrect = async function (password) {
-	return await bcrypt.compare(password, this.userPassword);
+	return password === this.userPassword;
 };
 
 // method to generate Access Tokens
