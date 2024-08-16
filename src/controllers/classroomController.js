@@ -2,6 +2,7 @@ import { Classroom } from "../models/classroom.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Teacher } from "../models/teacher.model.js";
 import { Student } from "../models/student.model.js";
+import { Task } from "../models/task.model.js";
 
 export class ClassroomController {
 	createClassroom = async (req, res) => {
@@ -184,12 +185,7 @@ export class ClassroomController {
 
 			res
 				.status(200)
-				.json(
-					new ApiResponse(
-						200,
-						"Student added to classroom successfully",
-					),
-				);
+				.json(new ApiResponse(200, "Student added to classroom successfully"));
 		} catch (error) {
 			res.status(500).json(new ApiResponse(500, {}, error.message));
 		}
@@ -246,15 +242,73 @@ export class ClassroomController {
 			res
 				.status(200)
 				.json(
+					new ApiResponse(200, "Student removed from classroom successfully"),
+				);
+		} catch (error) {
+			res.status(500).json(new ApiResponse(500, {}, error.message));
+		}
+	};
+
+	addTaskToClassroom = async (req, res) => {
+		try {
+			const { classroomId } = req.params;
+			const { title, description, dueDate } = req.body;
+			const classroom = await Classroom.findById(classroomId);
+			if (!classroom) {
+				return res
+					.status(404)
+					.json(new ApiResponse(404, {}, "Classroom not found"));
+			}
+
+			if (classroom.classroomTeacherId.toString() !== req.user._id.toString()) {
+				return res
+					.status(403)
+					.json(
+						new ApiResponse(
+							403,
+							{},
+							"You are not authorized to add task to this classroom",
+						),
+					);
+			}
+
+			const task = await Task.create({
+				taskTitle: title,
+				taskDescription: description,
+				taskDueDate: dueDate,
+				taskClassroom: classroomId,
+			});
+
+			if (!task) {
+				return res
+					.status(500)
+					.json(
+						new ApiResponse(
+							400,
+							{},
+							"Something went wrong while creating task",
+						),
+					);
+			}
+
+			classroom.classroomTasks.push(task._id);
+			await classroom.save();
+
+			res
+				.status(200)
+				.json(
 					new ApiResponse(
 						200,
-						"Student removed from classroom successfully",
+						{ task },
+						"Task added to classroom successfully",
 					),
 				);
 		} catch (error) {
 			res.status(500).json(new ApiResponse(500, {}, error.message));
 		}
 	};
+
+    
 }
 
 export const classroomController = new ClassroomController();

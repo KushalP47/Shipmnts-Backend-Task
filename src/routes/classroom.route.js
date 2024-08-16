@@ -4,12 +4,14 @@ import { verifyJWT } from "../middleware/verifyJWT.js";
 import { verifyIsTeacher } from "../middleware/verifyIsTeacher.js";
 const router = Router();
 
+// update classroom
 router.put(
 	"/:classroomId",
 	verifyJWT,
 	verifyIsTeacher,
 	classroomController.updateClassroom,
 );
+// delete classrooms
 router.delete(
 	"/:classroomId",
 	verifyJWT,
@@ -17,6 +19,7 @@ router.delete(
 	classroomController.deleteClassroom,
 );
 
+// add student to classroom
 router.post(
 	"/:classroomId/student",
 	verifyJWT,
@@ -24,6 +27,7 @@ router.post(
 	classroomController.addStudentToClassroom,
 );
 
+// remove student from classroom
 router.delete(
 	"/:classroomId/student/:studentId",
 	verifyJWT,
@@ -31,6 +35,14 @@ router.delete(
 	classroomController.removeStudentFromClassroom,
 );
 
+
+// add task to classroom
+router.post(
+    "/:classroomId/task",
+    verifyJWT,
+    verifyIsTeacher,
+    classroomController.addTaskToClassroom,
+);
 
 
 export default router;
