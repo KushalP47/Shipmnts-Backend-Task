@@ -46,6 +46,8 @@ Make sure you have the following installed on your machine:
 
 Entity Relational Diagram: [LucidChart Diagram](https://lucid.app/lucidchart/14b4ccd1-a3b4-45ad-85ea-be1d9fb28907/edit?viewport_loc=-858%2C-1341%2C2148%2C1163%2C0_0&invitationId=inv_8ca05848-af07-43e4-9065-f544a2556100)
 
+<img src="Shipmnts.png" />
+
 The database schema is defined using Mongoose models. You can find the schema definitions in the following files:
 
 - [Classroom Schema](server/src/models/classroom.model.js)
