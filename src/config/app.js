@@ -18,4 +18,7 @@ app.get("/", (req, res) => {
 	res.send("Welcome to the server");
 });
 
+import authRouter from "../routes/auth.route.js";
+app.use("/api/v1/auth", authRouter);
+
 export default app;

@@ -16,10 +16,6 @@ const studentSchema = new Schema(
 			required: true,
 			trim: true,
 		},
-		studentPassword: {
-			type: String,
-			required: true,
-		},
 		studentClassrooms: {
 			type: [Schema.Types.ObjectId],
 			ref: "Classroom",

@@ -1,7 +1,10 @@
 import { Schema, model } from "mongoose";
 import jwt from "jsonwebtoken"; // used to managed user-session
 import bcrypt from "bcrypt"; // used to encrypt the password before storing it on db
-
+import dotenv from "dotenv"; // used to access environment variables
+dotenv.config({
+	path: "../../.env",
+});
 const userSchema = new Schema(
 	{
 		userName: {
